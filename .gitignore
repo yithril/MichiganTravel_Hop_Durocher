@@ -1,0 +1,63 @@
+# Docker
+docker-compose.override.yml
+.docker/
+*.log
+
+# Docker volumes and data
+docker-volumes/
+data/
+volumes/
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment files
+.env
+.env.local
+.env.*.local
+.env.production
+.env.development
+*.env
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Build outputs (if any build scripts at root)
+dist/
+build/
+out/
+
+# Backup files
+*.bak
+*.backup
+*~
+
