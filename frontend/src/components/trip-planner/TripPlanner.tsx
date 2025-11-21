@@ -22,7 +22,7 @@ function TripPlannerContent() {
   if (loading) {
     return (
       <div 
-        className="flex items-center justify-center h-screen"
+        className="flex items-center justify-center h-full"
         style={{ backgroundColor: 'var(--color-background)' }}
       >
         <div className="text-center">
@@ -41,7 +41,7 @@ function TripPlannerContent() {
   if (error) {
     return (
       <div 
-        className="flex items-center justify-center h-screen p-4"
+        className="flex items-center justify-center h-full p-4"
         style={{ backgroundColor: 'var(--color-background)' }}
       >
         <div 
@@ -71,7 +71,7 @@ function TripPlannerContent() {
   if (!tripDetails) {
     return (
       <div 
-        className="flex items-center justify-center h-screen p-4"
+        className="flex items-center justify-center h-full p-4"
         style={{ backgroundColor: 'var(--color-background)' }}
       >
         <p 
@@ -86,7 +86,7 @@ function TripPlannerContent() {
 
   return (
     <div 
-      className="flex flex-col h-screen"
+      className="flex flex-col h-full"
       style={{ backgroundColor: 'var(--color-background)' }}
     >
       {/* Location Header */}

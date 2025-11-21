@@ -53,19 +53,34 @@ export default function ParallaxHero() {
         </div>
       </section>
 
-      {/* Second Section - Blue Background with Hidden Gems Text Right */}
-      <section className="relative h-screen flex items-center" style={{ backgroundColor: 'var(--color-michigan-dark)' }}>
-        <div className="container mx-auto px-4 flex justify-end">
-          <div className="max-w-md text-white text-right">
-            <span className="inline-block mb-2 font-light tracking-wider font-accent" style={{ color: 'var(--color-primary)' }}>
-              HIDDEN GEM
-            </span>
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading">
-              Hidden Gems
-            </h2>
-            <p className="text-lg md:text-xl">
-              Explore the breathtaking landscapes and hidden treasures that make Michigan truly special.
-            </p>
+      {/* Second Section - Glacier Image with Hidden Gems Text Right */}
+      <section className="relative h-screen overflow-hidden">
+        <div 
+          className="absolute inset-0"
+          style={{
+            transform: `translateY(${getParallaxOffset(1)}px)`,
+          }}
+        >
+          <Image
+            src="/img/glacier.jpeg"
+            alt="Michigan Glacier"
+            fill
+            className="object-cover"
+          />
+        </div>
+        <div className="absolute inset-0 flex items-center">
+          <div className="container mx-auto px-4 flex justify-end">
+            <div className="max-w-md text-right" style={{ color: 'var(--color-michigan-dark)' }}>
+              <span className="inline-block mb-2 font-light tracking-wider font-accent" style={{ color: 'var(--color-michigan-dark)' }}>
+                HIDDEN GEM
+              </span>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4 font-heading" style={{ color: 'var(--color-michigan-dark)' }}>
+                Hidden Gems
+              </h2>
+              <p className="text-lg md:text-xl" style={{ color: 'var(--color-michigan-dark)' }}>
+                Explore the breathtaking landscapes and hidden treasures that make Michigan truly special.
+              </p>
+            </div>
           </div>
         </div>
       </section>

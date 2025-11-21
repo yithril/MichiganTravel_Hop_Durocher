@@ -106,7 +106,10 @@ export function MichiganLoader({
               strokeLinejoin="round"
               strokeDasharray={strokeDasharray}
               style={{
-                animation: `${animationName} 4s ease-in-out infinite`,
+                animationName: animationName,
+                animationDuration: '4s',
+                animationTimingFunction: 'ease-in-out',
+                animationIterationCount: 'infinite',
                 animationDelay: `${index * 0.1}s`,
               }}
             />

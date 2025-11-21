@@ -16,21 +16,46 @@ class ApiError extends Error {
 }
 
 /**
+ * Get CSRF token from NextAuth (client-side only)
+ */
+async function getCsrfToken(): Promise<string | null> {
+  // Only try to get CSRF token on client-side
+  if (typeof window === 'undefined') {
+    return null
+  }
+
+  try {
+    // Dynamically import to avoid server-side import issues
+    const { getCsrfToken } = await import('next-auth/react')
+    return await getCsrfToken()
+  } catch (error) {
+    console.warn('Failed to get CSRF token:', error)
+    return null
+  }
+}
+
+/**
  * Generic fetch wrapper with authentication
  * 
- * CRITICAL: credentials: 'include' sends cookies (NextAuth session) with requests
+ * CRITICAL: 
+ * - credentials: 'include' sends cookies (NextAuth JWE token) with requests
+ * - X-XSRF-Token header is required for CSRF protection
  */
 async function fetchWithAuth(
   endpoint: string,
   options: RequestInit = {}
 ): Promise<Response> {
+  // Get CSRF token for client-side requests
+  const csrfToken = await getCsrfToken()
+  
   const headers: HeadersInit = {
     'Content-Type': 'application/json',
+    ...(csrfToken && { 'X-XSRF-Token': csrfToken }),
     ...options.headers,
   }
   
-  // Include credentials to send cookies (NextAuth session)
-  // This is how the JWT token gets sent to the backend
+  // Include credentials to send cookies (NextAuth session/JWE token)
+  // This is how the JWE token gets sent to the backend
   const response = await fetch(`${API_BASE_URL}${endpoint}`, {
     ...options,
     headers,

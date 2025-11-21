@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { getSession } from '@/lib/get-session'
 import ParallaxHero from '@/components/ParallaxHero'
+import SignOutButton from '@/components/SignOutButton'
 
 export default async function HomePage() {
   const session = await getSession()
@@ -13,7 +14,7 @@ export default async function HomePage() {
           <Link href="/" className="text-xl font-bold font-heading">
             Hidden Gems of Michigan
           </Link>
-          <div className="flex gap-4">
+          <div className="flex items-center gap-4">
             {session ? (
               <>
                 <span className="text-sm text-muted-foreground">
@@ -25,6 +26,7 @@ export default async function HomePage() {
                 >
                   Dashboard
                 </Link>
+                <SignOutButton />
               </>
             ) : (
               <>

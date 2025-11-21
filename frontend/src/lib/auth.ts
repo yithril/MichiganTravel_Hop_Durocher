@@ -17,7 +17,12 @@ export const authOptions: NextAuthOptions = {
 
         try {
           // Call your backend API for authentication
-          const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+          // Server-side: use Docker service name, client-side: use public URL
+          // Check if we're on the server (Next.js server) or client (browser)
+          const isServer = typeof window === 'undefined'
+          const backendUrl = isServer
+            ? (process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://backend:8000')
+            : (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000')
           const response = await fetch(`${backendUrl}/api/auth/login`, {
             method: 'POST',
             headers: {
