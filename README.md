@@ -1,123 +1,95 @@
-# Hackathon Project
+# Hidden Gems of Michigan
 
-FastAPI backend + Next.js frontend with authentication.
+> Discovering the lesser-known treasures of the Great Lakes State and driving tourism dollars to local communities
 
-## Quick Start
+## 🌟 About
 
-### Prerequisites
+**Hidden Gems** is an intelligent travel planning platform designed to help travelers discover the authentic, off-the-beaten-path experiences that Michigan has to offer. Our mission is to connect visitors with unique local attractions, driving tourism dollars to smaller communities and supporting local economies across the state.
 
-- Python 3.12.x (required - Python 3.13 has compatibility issues)
-- Node.js 18+
-- PostgreSQL (local or Docker)
-- Poetry (for Python dependency management)
+While many travelers know about Michigan's popular destinations like Mackinac Island or Traverse City, countless hidden gems remain undiscovered. These lesser-known destinations offer authentic experiences, from quiet beaches and maritime museums to wildlife sanctuaries and geological wonders. Our platform makes it easy to find and plan trips to these special places.
 
-### Setup
+### Key Features
 
-1. **Backend Setup:**
-   ```bash
-   cd backend
-   poetry install
-   cp .env.example .env
-   # Edit .env with your database URL and AUTH_SECRET
-   ```
+- 🗺️ **Intelligent Trip Planning**: AI-powered conversation system that understands your travel preferences and creates personalized itineraries
+- 📍 **Hidden Gem Discovery**: Curated database of unique attractions across Michigan's lesser-known destinations
+- 📸 **Visual Inspiration**: Beautiful imagery showcasing the beauty of Michigan's hidden treasures
+- 📅 **Day-by-Day Itineraries**: Build detailed day plans with activities organized by time slots
+- 💰 **Local Economy Focus**: Designed to drive tourism to smaller communities and support local businesses
 
-2. **Frontend Setup:**
-   ```bash
-   cd frontend
-   npm install
-   cp .env.local.example .env.local
-   # Edit .env.local with AUTH_SECRET (must match backend)
-   ```
+## 🎯 The Problem We're Solving
 
-3. **Generate AUTH_SECRET:**
-   ```bash
-   openssl rand -base64 32
-   ```
-   Use the same value in both `backend/.env` and `frontend/.env.local`
+Michigan's tourism industry is often concentrated in well-known destinations, leaving many smaller communities and unique attractions undiscovered. This concentration means:
 
-4. **Start PostgreSQL** (locally or via Docker)
+- Local businesses in smaller communities miss out on tourism revenue
+- Travelers miss authentic, uncrowded experiences
+- Hidden natural and cultural treasures remain underappreciated
 
-5. **Initialize Database:**
-   ```bash
-   cd backend
-   poetry shell
-   aerich init -t core.tortoise_config.TORTOISE_ORM
-   aerich init-db
-   aerich upgrade
-   ```
+**Hidden Gems** addresses this by making it easy to discover and plan trips to these lesser-known destinations, spreading tourism dollars more equitably across the state.
 
-6. **Start Backend:**
-   ```bash
-   cd backend
-   poetry run dev
-   ```
+## 🖼️ System Design
 
-7. **Start Frontend:**
-   ```bash
-   cd frontend
-   npm run dev
-   ```
+Our platform is built with a modern, scalable architecture that combines conversational AI with intelligent recommendation systems:
 
-## Environment Variables
+![System Design](./systemdesign2.png)
 
-### Backend (`backend/.env`)
-- `DATABASE_URL` - PostgreSQL connection string
-- `AUTH_SECRET` - Must match frontend (generate with `openssl rand -base64 32`)
-- `AUTH_URL` - Backend URL (default: `http://localhost:8000`)
+### Architecture Overview
 
-### Frontend (`frontend/.env.local`)
-- `AUTH_SECRET` - Must match backend exactly
-- `NEXT_PUBLIC_API_URL` - Backend API URL (default: `http://localhost:8000`)
-- `NEXTAUTH_URL` - Frontend URL (default: `http://localhost:3000`)
+- **Conversational Trip Planning**: Interactive AI agent that understands natural language to help users define their ideal trip
+- **Smart Recommendations**: Algorithm that matches travelers with attractions based on their preferences (vibes, budget, companions)
+- **Flexible Itinerary Builder**: Intuitive day-by-day planning tool that lets users customize every aspect of their trip
+- **Rich Media**: High-quality imagery and detailed information for each destination
 
-## Project Structure
+## 🎨 The Platform
 
-```
-.
-├── backend/          # FastAPI backend
-│   ├── core/         # Core utilities
-│   ├── infrastructure/  # Database provider
-│   ├── services/     # Business logic
-│   ├── controllers/  # API routes
-│   └── dtos/         # Data Transfer Objects
-├── frontend/         # Next.js frontend
-│   ├── app/          # Pages
-│   └── src/          # Components, hooks, lib
-└── readmes/          # Setup documentation
-```
+Experience the beauty of Michigan's hidden gems:
 
-## Testing
+![Hidden Gems Platform](./hiddengems.png)
 
-1. **Backend Health Check:**
-   ```bash
-   curl http://localhost:8000/health
-   ```
+Our platform provides an intuitive, visually-rich experience that makes trip planning both informative and inspiring. From the initial discovery phase through detailed itinerary planning, every interaction is designed to help users find their perfect Michigan adventure.
 
-2. **API Documentation:**
-   Open http://localhost:8000/docs
+## 💡 How It Works
 
-3. **Frontend:**
-   Open http://localhost:3000
+1. **Tell Us Your Preferences**: Start a conversation with our AI assistant about what you're looking for in your Michigan trip
+2. **Get Personalized Recommendations**: Our system matches you with attractions and destinations that fit your style
+3. **Build Your Itinerary**: Use our day-by-day planner to organize activities, from morning to evening
+4. **Discover Hidden Gems**: Explore curated collections of lesser-known destinations with detailed information and imagery
 
-## Authentication Flow
+## 🏗️ Technology Stack
 
-1. User registers via `/register` page
-2. User logs in via `/login` page
-3. NextAuth creates JWT token and stores as HTTP-only cookie
-4. All API requests automatically include the cookie
-5. Backend validates JWT token using shared `AUTH_SECRET`
+### Backend
+- **FastAPI**: High-performance Python web framework
+- **Tortoise ORM**: Modern async ORM for database operations
+- **AI Agent System**: Custom conversational AI for trip planning
+- **PostgreSQL**: Robust relational database
 
-## Key Technologies
+### Frontend
+- **Next.js 16**: React framework with server-side rendering
+- **TypeScript**: Type-safe development
+- **Tailwind CSS**: Modern, utility-first styling
+- **NextAuth**: Secure authentication system
 
-- **Backend**: FastAPI, Tortoise ORM, Aerich, Argon2, NextAuth JWT
-- **Frontend**: Next.js 16, NextAuth v4, Tailwind CSS v4, TypeScript
+## 🌲 Featured Destinations
 
-## Documentation
+Our platform includes detailed information about hidden gems like:
 
-See `readmes/` folder for detailed setup guides:
-- `QUICKSTART.md` - Quick start guide
-- `PROJECT_SCAFFOLD.md` - Setup order
-- `BACKEND_SETUP.md` - Backend setup details
-- `FRONTEND_SETUP.md` - Frontend setup details
-- `AUTH_SETUP.md` - Authentication setup details
+- **Alpena**: Maritime heritage, shipwreck tours, and quiet beaches
+- **Rockport State Recreation Area**: Fossil beds and undeveloped Lake Huron shoreline
+- **Island Park & Wildlife Sanctuary**: Peaceful nature trails and wildlife viewing
+- And many more lesser-known treasures across Michigan
 
+## 🚀 Impact
+
+By helping travelers discover Michigan's hidden gems, we aim to:
+
+- **Support Local Communities**: Drive tourism revenue to smaller communities
+- **Preserve Natural Spaces**: Encourage appreciation and responsible tourism
+- **Enhance Travel Experiences**: Help visitors discover authentic, uncrowded destinations
+- **Promote Economic Development**: Spread tourism dollars more equitably across the state
+
+## 📝 License
+
+This project is developed for educational and demonstration purposes.
+
+---
+
+*Built with ❤️ to showcase the hidden treasures of Michigan*
