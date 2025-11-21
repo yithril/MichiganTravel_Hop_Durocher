@@ -1,14 +1,61 @@
-[project]
+[tool.poetry]
 name = "backend"
 version = "0.1.0"
 description = ""
-authors = [
-    {name = "Code4YourFuture",email = "codeforyourfuture@gmail.com"}
-]
+authors = ["Jonathan Hop <yithril@gmail.com>"]
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-]
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<3.13"
+
+# Core Framework
+fastapi = "^0.115.0"
+uvicorn = {extras = ["standard"], version = "^0.32.0"}
+pydantic = {extras = ["email"], version = "^2.9.0"}
+pydantic-settings = "^2.6.0"
+python-multipart = "^0.0.12"
+
+# Database (Tortoise ORM + Aerich)
+tortoise-orm = "^0.20.0"
+aerich = "^0.7.2"
+asyncpg = "^0.29.0"
+
+# Authentication
+fastapi-nextauth-jwt = "^2.1.1"
+argon2-cffi = "^23.1.0"
+
+# Utilities
+python-dotenv = "^1.0.0"
+ibm-watsonx-ai = "^1.4.7"
+aioboto3 = "^13.0.0"
+
+# LangChain & IBM Integration
+langchain = "^0.3.0"
+langchain-ibm = "^0.3.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.23.0"
+black = "^24.0.0"
+ruff = "^0.1.0"
+
+[tool.poetry.scripts]
+dev = "uvicorn main:app --reload --host 0.0.0.0 --port 8000"
+
+[tool.aerich]
+tortoise_orm = "core.tortoise_config.TORTOISE_ORM"
+location = "./migrations"
+src_folder = "./."
+
+[tool.pytest.ini_options]
+# Configure pytest to use the backend directory as the Python path
+# This allows imports without relative path hacks
+pythonpath = ["."]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
 
 
 [build-system]

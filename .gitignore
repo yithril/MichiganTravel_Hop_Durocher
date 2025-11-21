@@ -61,3 +61,6 @@ out/
 *.backup
 *~
 
+# Documentation
+readmes/
+
