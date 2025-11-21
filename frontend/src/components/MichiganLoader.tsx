@@ -8,6 +8,7 @@ interface MichiganLoaderProps {
   fillColor?: string
   progress?: number // 0-100, optional for automatic animation
   className?: string
+  'aria-label'?: string
 }
 
 export function MichiganLoader({
@@ -15,7 +16,8 @@ export function MichiganLoader({
   strokeColor = 'rgb(59 130 246)', // blue-500
   fillColor = 'rgba(59 130 246 / 0.2)', // blue with transparency
   progress,
-  className = ''
+  className = '',
+  'aria-label': ariaLabel = 'Loading'
 }: MichiganLoaderProps) {
   // Combined paths from your michigan.svg - all path elements combined
   // The SVG viewBox is "0 0 570 506"
@@ -60,16 +62,24 @@ export function MichiganLoader({
     ? `${pathLength * (1 - progress / 100)}`
     : undefined
 
+  // Generate unique animation name to avoid conflicts
+  const animationName = `michigan-loader-${Math.random().toString(36).slice(2, 11)}`
+
   return (
-    <div className={`flex flex-col items-center justify-center ${className}`}>
+    <div 
+      className={`flex flex-col items-center justify-center ${className}`}
+      role="status"
+      aria-label={ariaLabel}
+      aria-live="polite"
+    >
       <svg
         width={size}
         height={size}
         viewBox="0 0 570 506"
         className="overflow-visible"
         preserveAspectRatio="xMidYMid meet"
+        aria-hidden="true"
       >
-        
         {/* Animated outline - progressively fills in based on progress */}
         {/* Use combined path for smoother progress-based animation */}
         {progress !== undefined ? (
@@ -96,7 +106,7 @@ export function MichiganLoader({
               strokeLinejoin="round"
               strokeDasharray={strokeDasharray}
               style={{
-                animation: `drawPath 4s ease-in-out infinite`,
+                animation: `${animationName} 4s ease-in-out infinite`,
                 animationDelay: `${index * 0.1}s`,
               }}
             />
@@ -106,7 +116,7 @@ export function MichiganLoader({
       
       {/* CSS animation for automatic mode */}
       <style jsx>{`
-        @keyframes drawPath {
+        @keyframes ${animationName} {
           0% {
             stroke-dashoffset: ${pathLength};
             opacity: 0.3;
@@ -124,4 +134,7 @@ export function MichiganLoader({
     </div>
   )
 }
+
+// Default export for easier importing
+export default MichiganLoader
 

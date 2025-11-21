@@ -1,8 +1,13 @@
 """Trip controller for listing trips and active trip seeds."""
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from core.dependencies import CurrentUser
 from core.models.user import User
-from dtos.trip_dto import TripsListResponse
+from dtos.trip_dto import (
+    TripsListResponse,
+    CreateTripRequest,
+    TripResponse,
+    TripDetailsResponse,
+)
 from services.trip_service import TripService
 from services.trip_seed_service import TripSeedService
 from services.core.agent.conversation_service import ConversationService
@@ -48,4 +53,139 @@ async def get_trips(
         TripsListResponse with trips and active trip seeds
     """
     return await trip_service.get_user_trips_and_active_seeds(user_id=user.id)
+
+
+@router.post("", response_model=TripResponse, status_code=status.HTTP_201_CREATED)
+async def create_trip(
+    request: CreateTripRequest,
+    user: CurrentUser,
+    trip_service: TripService = Depends(get_trip_service),
+) -> TripResponse:
+    """
+    Create a trip from a completed trip seed.
+    
+    Args:
+        request: CreateTripRequest with trip_seed_id and name
+        user: Current authenticated user (from dependency)
+        trip_service: Trip service (from dependency)
+        
+    Returns:
+        TripResponse for the newly created trip
+        
+    Raises:
+        HTTPException 400: If trip seed not found, not complete, or doesn't belong to user
+    """
+    try:
+        return await trip_service.create_trip_from_seed(
+            user_id=user.id,
+            request=request,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.get("/{trip_id}", response_model=TripDetailsResponse)
+async def get_trip_details(
+    trip_id: int,
+    user: CurrentUser,
+    trip_service: TripService = Depends(get_trip_service),
+) -> TripDetailsResponse:
+    """
+    Get full trip details with days and stops.
+    
+    Args:
+        trip_id: ID of the trip
+        user: Current authenticated user (from dependency)
+        trip_service: Trip service (from dependency)
+        
+    Returns:
+        TripDetailsResponse with nested days and stops
+        
+    Raises:
+        HTTPException 400: If trip not found or doesn't belong to user
+    """
+    try:
+        return await trip_service.get_trip_details(
+            user_id=user.id,
+            trip_id=trip_id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.post("/{trip_id}/finalize", response_model=TripResponse)
+async def finalize_trip(
+    trip_id: int,
+    user: CurrentUser,
+    trip_service: TripService = Depends(get_trip_service),
+) -> TripResponse:
+    """
+    Finalize a trip when all days have at least one activity.
+    
+    Validates that:
+    - Trip exists and belongs to user
+    - Trip is in PLANNED status
+    - All days have at least one stop/activity
+    
+    Args:
+        trip_id: ID of the trip to finalize
+        user: Current authenticated user (from dependency)
+        trip_service: Trip service (from dependency)
+        
+    Returns:
+        TripResponse for the finalized trip
+        
+    Raises:
+        HTTPException 400: If trip not found, doesn't belong to user, not in PLANNED status, or days are incomplete
+    """
+    try:
+        return await trip_service.finalize_trip(
+            user_id=user.id,
+            trip_id=trip_id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+
+
+@router.post("/{trip_id}/complete", response_model=TripResponse)
+async def mark_trip_completed(
+    trip_id: int,
+    user: CurrentUser,
+    trip_service: TripService = Depends(get_trip_service),
+) -> TripResponse:
+    """
+    Mark a trip as completed (user has gone on the trip).
+    
+    This allows future features like uploading photos, reviews, etc.
+    
+    Args:
+        trip_id: ID of the trip to mark as completed
+        user: Current authenticated user (from dependency)
+        trip_service: Trip service (from dependency)
+        
+    Returns:
+        TripResponse for the completed trip
+        
+    Raises:
+        HTTPException 400: If trip not found or doesn't belong to user
+    """
+    try:
+        return await trip_service.mark_trip_completed(
+            user_id=user.id,
+            trip_id=trip_id,
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
 

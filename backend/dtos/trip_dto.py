@@ -1,6 +1,9 @@
 """Data Transfer Objects for trip operations."""
-from typing import Optional, List
+from typing import Optional, List, TYPE_CHECKING
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from dtos.trip_day_dto import TripDayResponse
 
 
 class TripResponse(BaseModel):
@@ -15,6 +18,7 @@ class TripResponse(BaseModel):
     trip_mode: str
     budget_band: str
     companions: Optional[str] = None
+    status: str  # planned, completed
     created_at: str
     updated_at: str
     
@@ -47,3 +51,29 @@ class TripsListResponse(BaseModel):
     total_trips: int
     total_active: int
 
+
+class CreateTripRequest(BaseModel):
+    """Request DTO for creating a trip from a trip seed."""
+    trip_seed_id: int
+    name: str
+
+
+class TripDetailsResponse(BaseModel):
+    """Response DTO for a trip with full details including days and stops."""
+    id: int
+    name: str
+    user_id: int
+    start_location_text: Optional[str] = None
+    start_latitude: Optional[float] = None
+    start_longitude: Optional[float] = None
+    num_days: int
+    trip_mode: str
+    budget_band: str
+    companions: Optional[str] = None
+    status: str  # planned, completed
+    days: List["TripDayResponse"]  # Nested days with stops (forward reference)
+    created_at: str
+    updated_at: str
+    
+    class Config:
+        from_attributes = True

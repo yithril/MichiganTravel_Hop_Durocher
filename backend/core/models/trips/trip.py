@@ -4,6 +4,7 @@ from core.models.base import BaseModel
 from core.models.trips.trip_mode import TripMode
 from core.models.trips.budget_band import BudgetBand
 from core.models.trips.companions import Companions
+from core.models.trips.trip_status import TripStatus
 
 
 class Trip(BaseModel):
@@ -22,10 +23,11 @@ class Trip(BaseModel):
     trip_mode = fields.CharEnumField(TripMode)
     budget_band = fields.CharEnumField(BudgetBand)
     companions = fields.CharEnumField(Companions, null=True)
+    status = fields.CharEnumField(TripStatus, default=TripStatus.PLANNED)
     
     class Meta:
         table = "trips"
     
     def __str__(self):
-        return f"Trip(id={self.id}, name={self.name}, user_id={self.user_id})"
+        return f"Trip(id={self.id}, name={self.name}, user_id={self.user_id}, status={self.status})"
 

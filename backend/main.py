@@ -5,6 +5,9 @@ from infrastructure.database import db_provider
 from controllers.auth_controller import router as auth_router
 from controllers.trip_seed_controller import router as trip_seed_router
 from controllers.trip_controller import router as trip_router
+from controllers.trip_day_controller import router as trip_day_router
+from controllers.trip_stop_controller import router as trip_stop_router
+from controllers.attraction_controller import router as attraction_router
 
 
 app = FastAPI(
@@ -26,6 +29,9 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(trip_seed_router)
 app.include_router(trip_router)
+app.include_router(trip_day_router)
+app.include_router(trip_stop_router)
+app.include_router(attraction_router)
 
 
 @app.on_event("startup")
