@@ -7,6 +7,7 @@ from dtos.trip_seed_dto import (
     TripSeedAgentResponse as TripSeedAgentResponseDTO,
     TripSeedStateResponse,
 )
+from dtos.agent_dto import ConversationResponse
 from services.trip_seed_service import TripSeedService
 from services.core.agent.conversation_service import ConversationService
 from services.core.agent.trip_seed_agent_service import TripSeedAgentService
@@ -28,6 +29,13 @@ def get_trip_seed_service() -> TripSeedService:
         conversation_service=conversation_service,
         agent_service=agent_service,
     )
+
+
+def get_conversation_service() -> ConversationService:
+    """
+    Dependency to get ConversationService instance.
+    """
+    return ConversationService()
 
 
 @router.post("/message", response_model=TripSeedAgentResponseDTO)
@@ -86,5 +94,61 @@ async def send_message(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to process message: {str(e)}"
+        )
+
+
+@router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
+async def get_conversation(
+    conversation_id: int,
+    user: CurrentUser,
+    conversation_service: ConversationService = Depends(get_conversation_service),
+) -> ConversationResponse:
+    """
+    Get a conversation with its messages by conversation ID.
+    
+    This endpoint:
+    - Retrieves the conversation and all its messages
+    - Validates that the conversation belongs to the current user
+    - Returns conversation with messages in chronological order
+    
+    Args:
+        conversation_id: ID of the conversation to retrieve
+        user: Current authenticated user (from dependency)
+        conversation_service: Conversation service (from dependency)
+        
+    Returns:
+        ConversationResponse with messages
+        
+    Raises:
+        HTTPException 400: If conversation not found or doesn't belong to user
+        HTTPException 401: If not authenticated (handled by CurrentUser dependency)
+    """
+    try:
+        # Get conversation and validate it belongs to user
+        conversation = await conversation_service.get_conversation(
+            conversation_id=conversation_id,
+            user_id=user.id,
+        )
+        
+        if not conversation:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Conversation {conversation_id} not found"
+            )
+        
+        # Get conversation with messages
+        return await conversation_service.get_conversation_response(conversation_id)
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get conversation: {str(e)}"
         )
 
