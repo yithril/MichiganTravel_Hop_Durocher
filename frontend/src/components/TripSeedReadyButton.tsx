@@ -14,15 +14,11 @@ export function TripSeedReadyButton({
   onCreateTrip,
   isLoading = false,
 }: TripSeedReadyButtonProps) {
-  if (!tripSeedState.is_complete) {
-    return null
-  }
-
   return (
     <div 
-      className="border-t p-4"
+      className="p-6 rounded-lg shadow-lg max-w-sm"
       style={{ 
-        borderColor: 'var(--color-border)',
+        border: '1px solid var(--color-border)',
         backgroundColor: 'var(--color-card)',
       }}
     >

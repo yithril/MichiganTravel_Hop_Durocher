@@ -123,6 +123,15 @@ class TripStopService:
         except ValueError:
             raise ValueError(f"Invalid slot: {request.slot}. Must be one of: morning, afternoon, evening, flex")
         
+        # Check for duplicate attraction in the same day
+        if request.attraction_id:
+            existing_stop = await TripStop.filter(
+                trip_day_id=day_id,
+                attraction_id=request.attraction_id
+            ).first()
+            if existing_stop:
+                raise ValueError(f"This activity is already added to this day")
+        
         # Create the stop
         stop = await TripStop.create(
             trip_day_id=day_id,

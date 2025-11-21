@@ -11,8 +11,12 @@ export default async function HomePage() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link href="/" className="text-xl font-bold font-heading">
-            Hidden Gems of Michigan
+          <Link href="/" className="flex items-center">
+            <img 
+              src="/img/logo.png" 
+              alt="Hidden Gems" 
+              style={{ maxHeight: '100px', height: 'auto', width: 'auto', objectFit: 'contain' }}
+            />
           </Link>
           <div className="flex items-center gap-4">
             {session ? (

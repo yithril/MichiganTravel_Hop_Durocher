@@ -1,11 +1,13 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { api, TripResponse, TripDetailsResponse } from '@/lib/api'
 import { MichiganLoader } from './MichiganLoader'
 import { TripPlanner } from './trip-planner/TripPlanner'
 
 export function PastTripsView() {
+  const router = useRouter()
   const [trips, setTrips] = useState<TripResponse[]>([])
   const [selectedTrip, setSelectedTrip] = useState<TripDetailsResponse | null>(null)
   const [isLoading, setIsLoading] = useState(true)
@@ -28,16 +30,8 @@ export function PastTripsView() {
   }
 
   const handleTripClick = async (tripId: number) => {
-    try {
-      setIsLoadingTripDetails(true)
-      const details = await api.trips.getDetails(tripId)
-      setSelectedTrip(details)
-    } catch (error) {
-      console.error('Failed to load trip details:', error)
-      alert('Failed to load trip details. Please try again.')
-    } finally {
-      setIsLoadingTripDetails(false)
-    }
+    // Navigate to trip planning page
+    router.push(`/trip/${tripId}`)
   }
 
   const formatDate = (dateString: string) => {
@@ -177,34 +171,64 @@ export function PastTripsView() {
               key={trip.id}
               onClick={() => handleTripClick(trip.id)}
               disabled={isLoadingTripDetails}
-              className="text-left p-6 rounded-lg transition-all hover:opacity-80 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group flex flex-col overflow-hidden rounded-lg transition-all hover:scale-[1.02] hover:shadow-lg text-left disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: 'var(--color-card)',
                 border: `1px solid var(--color-border)`,
               }}
             >
-              <div className="font-semibold text-lg mb-2" style={{ color: 'var(--color-foreground)' }}>
-                {trip.name}
+              {/* Card Image */}
+              <div className="relative w-full h-48 overflow-hidden">
+                <img
+                  src={trip.cover_image_url || '/img/michigan_default.png'}
+                  alt={trip.name}
+                  className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                  onError={(e) => {
+                    console.error('Failed to load image:', trip.cover_image_url || '/img/michigan_default.png')
+                    // Fallback to default if even that fails
+                    e.currentTarget.src = '/img/michigan_default.png'
+                  }}
+                />
               </div>
-              <div className="space-y-2 text-sm">
-                {trip.start_location_text && (
+              
+              {/* Card Body */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="font-semibold text-lg mb-2" style={{ color: 'var(--color-foreground)' }}>
+                  {trip.name}
+                </div>
+                <div className="space-y-2 text-sm mb-2">
+                  {trip.start_location_text && (
+                    <div className="flex items-center gap-2" style={{ color: 'var(--color-muted-foreground)' }}>
+                      <span>📍</span>
+                      <span>{trip.start_location_text}</span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2" style={{ color: 'var(--color-muted-foreground)' }}>
-                    <span>📍</span>
-                    <span>{trip.start_location_text}</span>
+                    <span>📅</span>
+                    <span>{trip.num_days} {trip.num_days === 1 ? 'day' : 'days'}</span>
                   </div>
-                )}
-                <div className="flex items-center gap-2" style={{ color: 'var(--color-muted-foreground)' }}>
-                  <span>📅</span>
-                  <span>{trip.num_days} {trip.num_days === 1 ? 'day' : 'days'}</span>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap mt-auto">
+                  <div 
+                    className="text-xs px-2 py-1 rounded-full capitalize"
+                    style={getStatusBadgeColor(trip.status)}
+                  >
+                    {trip.status}
+                  </div>
+                  {trip.trip_mode && (
+                    <span 
+                      className="text-xs px-2 py-1 rounded"
+                      style={{
+                        backgroundColor: 'var(--color-muted)',
+                        color: 'var(--color-muted-foreground)',
+                      }}
+                    >
+                      {trip.trip_mode.replace('_', ' ')}
+                    </span>
+                  )}
                 </div>
                 <div 
-                  className="text-xs px-2 py-1 rounded-full inline-block capitalize"
-                  style={getStatusBadgeColor(trip.status)}
-                >
-                  {trip.status}
-                </div>
-                <div 
-                  className="text-xs"
+                  className="text-xs mt-2"
                   style={{ color: 'var(--color-muted-foreground)' }}
                 >
                   Created {formatDate(trip.created_at)}

@@ -8,6 +8,7 @@ interface ConversationSidebarProps {
   activeConversationId?: number | null
   onSelectConversation: (conversationId: number) => void
   onNewConversation: () => void
+  onDeleteConversation?: (conversationId: number) => void
 }
 
 export function ConversationSidebar({
@@ -15,6 +16,7 @@ export function ConversationSidebar({
   activeConversationId,
   onSelectConversation,
   onNewConversation,
+  onDeleteConversation,
 }: ConversationSidebarProps) {
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -95,13 +97,25 @@ export function ConversationSidebar({
           </div>
         ) : (
           <div className="p-2 space-y-1">
-            {conversations.map((conversation) => {
+            {/* Deduplicate conversations by trip_seed_id or conversation_id */}
+            {Array.from(
+              new Map(
+                conversations.map(conv => [
+                  conv.trip_seed_id || conv.conversation_id,
+                  conv
+                ])
+              ).values()
+            ).map((conversation, index) => {
               const isActive = conversation.conversation_id === activeConversationId
+              // Use trip_seed_id as primary key, fallback to index if needed for uniqueness
+              const uniqueKey = conversation.trip_seed_id 
+                ? `trip-seed-${conversation.trip_seed_id}` 
+                : `conversation-${conversation.conversation_id}-${index}`
               return (
-                <button
-                  key={conversation.conversation_id}
+                <div
+                  key={uniqueKey}
                   onClick={() => onSelectConversation(conversation.conversation_id)}
-                  className="w-full text-left p-3 rounded-md transition-colors"
+                  className="w-full text-left p-3 rounded-md transition-colors cursor-pointer"
                   style={{
                     backgroundColor: isActive
                       ? 'var(--color-primary)'
@@ -123,7 +137,7 @@ export function ConversationSidebar({
                     }
                   }}
                 >
-                  <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-start justify-between gap-2 w-full">
                     <div className="flex-1 min-w-0">
                       <div className="font-medium text-sm truncate">
                         {getConversationPreview(conversation)}
@@ -152,8 +166,51 @@ export function ConversationSidebar({
                         </div>
                       )}
                     </div>
+                    {onDeleteConversation && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          if (confirm('Are you sure you want to delete this conversation?')) {
+                            onDeleteConversation(conversation.conversation_id)
+                          }
+                        }}
+                        className="p-1 rounded hover:bg-opacity-20 transition-colors"
+                        style={{
+                          color: isActive
+                            ? 'var(--color-primary-foreground)'
+                            : 'var(--color-muted-foreground)',
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.backgroundColor = 'var(--color-destructive)'
+                          e.currentTarget.style.color = 'var(--color-destructive-foreground)'
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.backgroundColor = 'transparent'
+                          e.currentTarget.style.color = isActive
+                            ? 'var(--color-primary-foreground)'
+                            : 'var(--color-muted-foreground)'
+                        }}
+                        title="Delete conversation"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          width="16"
+                          height="16"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        >
+                          <path d="M3 6h18" />
+                          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
+                          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
-                </button>
+                </div>
               )
             })}
           </div>

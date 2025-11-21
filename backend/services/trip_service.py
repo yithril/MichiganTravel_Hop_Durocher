@@ -104,6 +104,7 @@ class TripService:
                 budget_band=trip.budget_band.value,
                 companions=trip.companions.value if trip.companions else None,
                 status=trip.status.value,
+                cover_image_url=trip.cover_image_url,
                 created_at=trip.created_at.isoformat(),
                 updated_at=trip.updated_at.isoformat(),
             )
@@ -189,6 +190,7 @@ class TripService:
             budget_band=trip.budget_band.value,
             companions=trip.companions.value if trip.companions else None,
             status=trip.status.value,
+            cover_image_url=trip.cover_image_url,
             created_at=trip.created_at.isoformat(),
             updated_at=trip.updated_at.isoformat(),
         )
@@ -282,6 +284,7 @@ class TripService:
             budget_band=trip.budget_band.value,
             companions=trip.companions.value if trip.companions else None,
             status=trip.status.value,
+            cover_image_url=trip.cover_image_url,
             days=day_responses,
             created_at=trip.created_at.isoformat(),
             updated_at=trip.updated_at.isoformat(),
@@ -349,6 +352,7 @@ class TripService:
             budget_band=trip.budget_band.value,
             companions=trip.companions.value if trip.companions else None,
             status=trip.status.value,
+            cover_image_url=trip.cover_image_url,
             created_at=trip.created_at.isoformat(),
             updated_at=trip.updated_at.isoformat(),
         )
@@ -395,6 +399,7 @@ class TripService:
             budget_band=trip.budget_band.value,
             companions=trip.companions.value if trip.companions else None,
             status=trip.status.value,
+            cover_image_url=trip.cover_image_url,
             created_at=trip.created_at.isoformat(),
             updated_at=trip.updated_at.isoformat(),
         )

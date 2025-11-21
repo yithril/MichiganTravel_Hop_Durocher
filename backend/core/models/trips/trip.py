@@ -24,6 +24,7 @@ class Trip(BaseModel):
     budget_band = fields.CharEnumField(BudgetBand)
     companions = fields.CharEnumField(Companions, null=True)
     status = fields.CharEnumField(TripStatus, default=TripStatus.PLANNED)
+    cover_image_url = fields.CharField(max_length=500, null=True)  # URL to cover image
     
     class Meta:
         table = "trips"

@@ -1,7 +1,6 @@
 """Trip day controller for managing trip days."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from core.dependencies import CurrentUser
 from dtos.trip_day_dto import (
     TripDayResponse,
     CreateTripDayRequest,
@@ -22,7 +21,6 @@ def get_trip_day_service() -> TripDayService:
 @router.get("", response_model=List[TripDayResponse])
 async def get_trip_days(
     trip_id: int,
-    user: CurrentUser,
     trip_day_service: TripDayService = Depends(get_trip_day_service),
 ) -> List[TripDayResponse]:
     """
@@ -30,7 +28,6 @@ async def get_trip_days(
     
     Args:
         trip_id: ID of the trip
-        user: Current authenticated user (from dependency)
         trip_day_service: Trip day service (from dependency)
         
     Returns:
@@ -40,8 +37,9 @@ async def get_trip_days(
         HTTPException 400: If trip not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         return await trip_day_service.get_trip_days(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
         )
     except ValueError as e:
@@ -55,7 +53,6 @@ async def get_trip_days(
 async def create_trip_day(
     trip_id: int,
     request: CreateTripDayRequest,
-    user: CurrentUser,
     trip_day_service: TripDayService = Depends(get_trip_day_service),
 ) -> TripDayResponse:
     """
@@ -64,7 +61,6 @@ async def create_trip_day(
     Args:
         trip_id: ID of the trip
         request: CreateTripDayRequest with day_index, base_city_id, and notes
-        user: Current authenticated user (from dependency)
         trip_day_service: Trip day service (from dependency)
         
     Returns:
@@ -74,8 +70,9 @@ async def create_trip_day(
         HTTPException 400: If trip not found, doesn't belong to user, or day_index already exists
     """
     try:
+        # TODO: Re-add authentication
         return await trip_day_service.create_trip_day(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             request=request,
         )
@@ -91,7 +88,6 @@ async def update_trip_day(
     trip_id: int,
     day_id: int,
     request: UpdateTripDayRequest,
-    user: CurrentUser,
     trip_day_service: TripDayService = Depends(get_trip_day_service),
 ) -> TripDayResponse:
     """
@@ -101,7 +97,6 @@ async def update_trip_day(
         trip_id: ID of the trip
         day_id: ID of the day to update
         request: UpdateTripDayRequest with fields to update
-        user: Current authenticated user (from dependency)
         trip_day_service: Trip day service (from dependency)
         
     Returns:
@@ -111,8 +106,9 @@ async def update_trip_day(
         HTTPException 400: If trip/day not found, doesn't belong to user, or city not found
     """
     try:
+        # TODO: Re-add authentication
         return await trip_day_service.update_trip_day(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
             request=request,
@@ -128,7 +124,6 @@ async def update_trip_day(
 async def delete_trip_day(
     trip_id: int,
     day_id: int,
-    user: CurrentUser,
     trip_day_service: TripDayService = Depends(get_trip_day_service),
 ) -> None:
     """
@@ -137,15 +132,15 @@ async def delete_trip_day(
     Args:
         trip_id: ID of the trip
         day_id: ID of the day to delete
-        user: Current authenticated user (from dependency)
         trip_day_service: Trip day service (from dependency)
         
     Raises:
         HTTPException 400: If trip/day not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         await trip_day_service.delete_trip_day(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
         )

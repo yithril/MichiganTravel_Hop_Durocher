@@ -136,10 +136,28 @@ class TripSeedService:
             current_state=trip_seed_state
         )
         
-        # Update status if complete
-        if agent_response.is_complete and trip_seed.status == TripSeedStatus.DRAFT:
+        # Reload trip_seed to get fresh values from database
+        trip_seed = await TripSeed.get(id=trip_seed.id)
+        
+        # Recalculate state after update to check actual completion
+        updated_state = await self._get_trip_seed_state(trip_seed)
+        is_actually_complete = (
+            updated_state["num_days"] is not None and
+            updated_state["trip_mode"] is not None and
+            updated_state["budget_band"] is not None
+        )
+        
+        # Update status if actually complete
+        if is_actually_complete and trip_seed.status == TripSeedStatus.DRAFT:
             trip_seed.status = TripSeedStatus.COMPLETE
             await trip_seed.save()
+        
+        # Update agent response with actual completion status
+        agent_response.is_complete = is_actually_complete
+        agent_response.missing_fields = [
+            field for field in ["num_days", "trip_mode", "budget_band"]
+            if updated_state[field] is None
+        ]
         
         return ProcessMessageResponse(
             agent_response=agent_response,
@@ -216,7 +234,7 @@ class TripSeedService:
         # This is a heuristic - in practice, the agent will set real values
         
         return {
-            "num_days": num_days if num_days and num_days > 0 else None,
+            "num_days": num_days if num_days is not None and num_days > 0 else None,
             "trip_mode": trip_seed.trip_mode.value if trip_seed.trip_mode else None,
             "budget_band": trip_seed.budget_band.value if trip_seed.budget_band else None,
             "start_location_text": trip_seed.start_location_text,

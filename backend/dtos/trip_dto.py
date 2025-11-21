@@ -19,6 +19,7 @@ class TripResponse(BaseModel):
     budget_band: str
     companions: Optional[str] = None
     status: str  # planned, completed
+    cover_image_url: Optional[str] = None
     created_at: str
     updated_at: str
     
@@ -71,6 +72,7 @@ class TripDetailsResponse(BaseModel):
     budget_band: str
     companions: Optional[str] = None
     status: str  # planned, completed
+    cover_image_url: Optional[str] = None
     days: List["TripDayResponse"]  # Nested days with stops (forward reference)
     created_at: str
     updated_at: str

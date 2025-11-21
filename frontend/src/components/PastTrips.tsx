@@ -86,54 +86,76 @@ export function PastTrips({ trips, onTripClick }: PastTripsProps) {
 
       {isExpanded && (
         <div className="border-t" style={{ borderColor: 'var(--color-border)' }}>
-          <div className="p-4 space-y-2 max-h-96 overflow-y-auto">
-            {trips.map((trip) => (
-              <button
-                key={trip.id}
-                onClick={() => onTripClick?.(trip.id)}
-                className="w-full text-left p-3 rounded-md transition-colors hover:opacity-80"
-                style={{
-                  backgroundColor: 'var(--color-background)',
-                  border: `1px solid var(--color-border)`,
-                }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="font-medium text-sm mb-1" style={{ color: 'var(--color-foreground)' }}>
+          <div className="p-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+              {trips.map((trip) => (
+                <button
+                  key={trip.id}
+                  onClick={() => onTripClick?.(trip.id)}
+                  className="group flex flex-col overflow-hidden rounded-lg transition-all hover:scale-[1.02] hover:shadow-lg text-left"
+                  style={{
+                    backgroundColor: 'var(--color-card)',
+                    border: `1px solid var(--color-border)`,
+                  }}
+                >
+                  {/* Card Image */}
+                  <div className="relative w-full h-48 overflow-hidden">
+                    <img
+                      src={trip.cover_image_url || '/img/michigan_default.png'}
+                      alt={trip.name}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-110"
+                      onError={(e) => {
+                        console.error('Failed to load image:', trip.cover_image_url || '/img/michigan_default.png')
+                        // Fallback to default if even that fails
+                        e.currentTarget.src = '/img/michigan_default.png'
+                      }}
+                    />
+                  </div>
+                  
+                  {/* Card Body */}
+                  <div className="p-4 flex-1 flex flex-col">
+                    <div className="font-semibold text-base mb-2" style={{ color: 'var(--color-foreground)' }}>
                       {trip.name}
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
+                    <div className="flex items-center gap-2 flex-wrap text-sm mb-2">
                       {trip.start_location_text && (
-                        <span 
-                          className="text-xs"
-                          style={{ color: 'var(--color-muted-foreground)' }}
-                        >
+                        <span style={{ color: 'var(--color-muted-foreground)' }}>
                           📍 {trip.start_location_text}
                         </span>
                       )}
-                      <span 
-                        className="text-xs"
-                        style={{ color: 'var(--color-muted-foreground)' }}
-                      >
+                      <span style={{ color: 'var(--color-muted-foreground)' }}>
                         {trip.num_days} {trip.num_days === 1 ? 'day' : 'days'}
                       </span>
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap mt-auto">
                       <span 
-                        className="text-xs px-2 py-0.5 rounded-full capitalize"
+                        className="text-xs px-2 py-1 rounded-full capitalize"
                         style={getStatusBadgeColor(trip.status)}
                       >
                         {trip.status}
                       </span>
+                      {trip.trip_mode && (
+                        <span 
+                          className="text-xs px-2 py-1 rounded"
+                          style={{
+                            backgroundColor: 'var(--color-muted)',
+                            color: 'var(--color-muted-foreground)',
+                          }}
+                        >
+                          {trip.trip_mode.replace('_', ' ')}
+                        </span>
+                      )}
                     </div>
                     <div 
-                      className="text-xs mt-1"
+                      className="text-xs mt-2"
                       style={{ color: 'var(--color-muted-foreground)' }}
                     >
                       Created {formatDate(trip.created_at)}
                     </div>
                   </div>
-                </div>
-              </button>
-            ))}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}

@@ -1,23 +1,27 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import React, { Suspense } from 'react'
+import { useParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { DashboardLayout } from '@/components/DashboardLayout'
-import { TripPlanningView } from '@/components/TripPlanningView'
-import { PastTripsView } from '@/components/PastTripsView'
 import Link from 'next/link'
-import SignOutButton from './SignOutButton'
+import { TripPlanner } from '@/components/trip-planner/TripPlanner'
+import SignOutButton from '@/components/SignOutButton'
 import { MichiganLoader } from '@/components/MichiganLoader'
 
-type DashboardView = 'plan-trip' | 'past-trips'
-
-function DashboardContent() {
+/**
+ * Trip Planning Page
+ * 
+ * Displays the trip planning interface with day-by-day itinerary planning.
+ * Includes top navigation menu.
+ */
+function TripPlanningContent() {
+  const params = useParams()
   const { data: session, status } = useSession()
   const router = useRouter()
-  const [currentView, setCurrentView] = useState<DashboardView>('past-trips')
+  const tripId = parseInt(params.id as string, 10)
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (status === 'unauthenticated') {
       router.push('/login')
     }
@@ -27,6 +31,21 @@ function DashboardContent() {
     return (
       <div className="flex items-center justify-center h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
         <MichiganLoader />
+      </div>
+    )
+  }
+
+  if (isNaN(tripId)) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--color-background)' }}>
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-foreground)' }}>
+            Invalid Trip ID
+          </h1>
+          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
+            The trip ID is not valid.
+          </p>
+        </div>
       </div>
     )
   }
@@ -43,7 +62,7 @@ function DashboardContent() {
       >
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link 
-            href="/"
+            href="/dashboard"
             className="flex items-center"
           >
             <img 
@@ -64,26 +83,22 @@ function DashboardContent() {
         </div>
       </nav>
 
-      {/* Dashboard with Sidebar */}
-      <DashboardLayout currentView={currentView} onViewChange={setCurrentView}>
-        {currentView === 'plan-trip' ? (
-          <TripPlanningView />
-        ) : (
-          <PastTripsView />
-        )}
-      </DashboardLayout>
+      {/* Trip Planner */}
+      <div className="flex-1 overflow-hidden">
+        <TripPlanner tripId={tripId} />
+      </div>
     </div>
   )
 }
 
-export default function DashboardPage() {
+export default function TripPlanningPage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-screen" style={{ backgroundColor: 'var(--color-background)' }}>
         <MichiganLoader />
       </div>
     }>
-      <DashboardContent />
+      <TripPlanningContent />
     </Suspense>
   )
 }

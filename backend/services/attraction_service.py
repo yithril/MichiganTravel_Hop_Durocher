@@ -6,8 +6,10 @@ This service handles querying attractions filtered by vibes and location.
 from typing import List, Optional
 from core.models.places.attraction import Attraction
 from core.models.places.attraction_vibe import AttractionVibe
+from core.models.places.city import City
 from core.models.trips.trip import Trip
 from core.models.trips.trip_vibe import TripVibe
+from core.models.trips.trip_day import TripDay
 from dtos.attraction_dto import AttractionResponse, AttractionVibeInfo, AttractionsListResponse
 
 
@@ -43,14 +45,77 @@ class AttractionService:
         trip_vibes = await TripVibe.filter(trip_id=trip_id).all()
         vibe_ids = [tv.vibe_id for tv in trip_vibes]
         
+        print(f"🔍 get_attractions_by_trip_vibes: trip_id={trip_id}, vibe_ids={vibe_ids}")
+        
         if not vibe_ids:
-            # No vibes on trip, return empty list
-            return AttractionsListResponse(
-                attractions=[],
-                total=0,
-                trip_id=trip_id,
-                matching_vibe_ids=[],
-            )
+            # No vibes on trip - fall back to Alpena attractions
+            print("⚠️ No vibes found for trip, falling back to Alpena attractions")
+            # Try to get Alpena city by slug or name
+            alpena_city = await City.filter(slug="alpena").first()
+            if not alpena_city:
+                alpena_city = await City.filter(name="Alpena", state="MI").first()
+            
+            if alpena_city:
+                print(f"✅ Found Alpena city (id={alpena_city.id}), fetching attractions...")
+                # Get all attractions for Alpena
+                attractions = await Attraction.filter(city_id=alpena_city.id).prefetch_related('city').all()
+                print(f"📋 Found {len(attractions)} attractions for Alpena")
+                
+                # Build response DTOs
+                attraction_responses = []
+                for attraction in attractions:
+                    # Get vibes for this attraction
+                    attraction_vibes = await AttractionVibe.filter(
+                        attraction_id=attraction.id
+                    ).prefetch_related('vibe').all()
+                    
+                    vibe_infos = [
+                        AttractionVibeInfo(
+                            vibe_id=av.vibe_id,
+                            vibe_code=av.vibe.code,
+                            vibe_label=av.vibe.label,
+                            strength=float(av.strength),
+                        )
+                        for av in attraction_vibes
+                    ]
+                    
+                    attraction_responses.append(
+                        AttractionResponse(
+                            id=attraction.id,
+                            name=attraction.name,
+                            type=attraction.type,
+                            description=attraction.description,
+                            city_id=attraction.city_id,
+                            city_name=attraction.city.name,
+                            latitude=float(attraction.latitude),
+                            longitude=float(attraction.longitude),
+                            url=attraction.url,
+                            price_level=attraction.price_level,
+                            hidden_gem_score=float(attraction.hidden_gem_score) if attraction.hidden_gem_score else None,
+                            seasonality=attraction.seasonality,
+                            image_url=attraction.image_url,
+                            vibes=vibe_infos,
+                            created_at=attraction.created_at.isoformat(),
+                            updated_at=attraction.updated_at.isoformat(),
+                        )
+                    )
+                
+                print(f"✅ Returning {len(attraction_responses)} Alpena attractions")
+                return AttractionsListResponse(
+                    attractions=attraction_responses,
+                    total=len(attraction_responses),
+                    trip_id=trip_id,
+                    matching_vibe_ids=[],
+                )
+            else:
+                # No Alpena city found, return empty list
+                print("❌ Alpena city not found in database")
+                return AttractionsListResponse(
+                    attractions=[],
+                    total=0,
+                    trip_id=trip_id,
+                    matching_vibe_ids=[],
+                )
         
         # Get attractions that have at least one matching vibe
         # We'll find attractions that have any of the trip's vibes
@@ -126,6 +191,7 @@ class AttractionService:
                     price_level=attraction.price_level,
                     hidden_gem_score=float(attraction.hidden_gem_score) if attraction.hidden_gem_score else None,
                     seasonality=attraction.seasonality,
+                    image_url=attraction.image_url,
                     vibes=vibe_infos,
                     created_at=attraction.created_at.isoformat(),
                     updated_at=attraction.updated_at.isoformat(),
@@ -225,6 +291,7 @@ class AttractionService:
                     price_level=attraction.price_level,
                     hidden_gem_score=float(attraction.hidden_gem_score) if attraction.hidden_gem_score else None,
                     seasonality=attraction.seasonality,
+                    image_url=attraction.image_url,
                     vibes=vibe_infos,
                     created_at=attraction.created_at.isoformat(),
                     updated_at=attraction.updated_at.isoformat(),

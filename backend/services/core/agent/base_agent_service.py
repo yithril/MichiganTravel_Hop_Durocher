@@ -93,6 +93,7 @@ class BaseAgentService(ABC, Generic[T]):
         trip_id: Optional[int] = None,
         conversation_id: Optional[int] = None,
         use_history: bool = False,
+        original_user_message: Optional[str] = None,
     ) -> T:
         """
         Process a prompt and return a parsed Pydantic response.
@@ -148,19 +149,28 @@ class BaseAgentService(ABC, Generic[T]):
             # Parse response into Pydantic model
             parsed_response = self.parse_response(response_text)
             
+            # Get the text to save to conversation history
+            # If the parsed response has a response_text attribute (like TripSeedAgentResponse),
+            # use that instead of the raw JSON
+            message_content = response_text
+            if hasattr(parsed_response, 'response_text'):
+                message_content = parsed_response.response_text
+            
             # Save to conversation history if enabled
             if use_history and self.conversation_service:
                 if conversation_id:
                     # Add messages to existing conversation
+                    # Use original_user_message if provided, otherwise use prompt
+                    user_message_to_save = original_user_message if original_user_message else prompt
                     await self.conversation_service.add_message(
                         conversation_id=conversation_id,
                         role="user",
-                        content=prompt
+                        content=user_message_to_save
                     )
                     await self.conversation_service.add_message(
                         conversation_id=conversation_id,
                         role="assistant",
-                        content=response_text
+                        content=message_content
                     )
                 elif user_id:
                     # Create new conversation
@@ -168,15 +178,17 @@ class BaseAgentService(ABC, Generic[T]):
                         user_id=user_id,
                         trip_id=trip_id
                     )
+                    # Use original_user_message if provided, otherwise use prompt
+                    user_message_to_save = original_user_message if original_user_message else prompt
                     await self.conversation_service.add_message(
                         conversation_id=conv.id,
                         role="user",
-                        content=prompt
+                        content=user_message_to_save
                     )
                     await self.conversation_service.add_message(
                         conversation_id=conv.id,
                         role="assistant",
-                        content=response_text
+                        content=message_content
                     )
             
             return parsed_response

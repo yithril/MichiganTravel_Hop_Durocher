@@ -26,7 +26,10 @@ export function DaySelector() {
         return (
           <button
             key={dayIndex}
-            onClick={() => selectDay(dayIndex)}
+            onClick={() => {
+              console.log(`Selecting day ${dayIndex}, current selectedDayIndex: ${selectedDayIndex}`)
+              selectDay(dayIndex)
+            }}
             className="px-4 py-2 rounded-md font-medium transition-all whitespace-nowrap"
             style={{
               backgroundColor: isSelected

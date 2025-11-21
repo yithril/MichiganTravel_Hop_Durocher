@@ -101,10 +101,15 @@ class ConversationService:
         if not conversation:
             raise ValueError(f"Conversation {conversation_id} not found")
         
+        # Calculate the next sequence_index by counting existing messages
+        existing_count = await Message.filter(conversation_id=conversation_id).count()
+        sequence_index = existing_count  # 0-indexed: first message is 0, second is 1, etc.
+        
         message = await Message.create(
             conversation=conversation,
             role=role,
             content=content,
+            sequence_index=sequence_index,
         )
         
         # Update conversation timestamp

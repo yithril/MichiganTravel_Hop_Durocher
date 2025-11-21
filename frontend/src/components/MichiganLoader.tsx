@@ -1,6 +1,6 @@
 'use client'
 
-import React from 'react'
+import React, { useId } from 'react'
 
 interface MichiganLoaderProps {
   size?: number
@@ -12,9 +12,9 @@ interface MichiganLoaderProps {
 }
 
 export function MichiganLoader({
-  size = 200,
-  strokeColor = 'rgb(59 130 246)', // blue-500
-  fillColor = 'rgba(59 130 246 / 0.2)', // blue with transparency
+  size = 350,
+  strokeColor = 'var(--color-michigan-blue)',
+  fillColor = 'rgba(123, 189, 225, 0.2)', // michigan-blue with transparency
   progress,
   className = '',
   'aria-label': ariaLabel = 'Loading'
@@ -62,8 +62,9 @@ export function MichiganLoader({
     ? `${pathLength * (1 - progress / 100)}`
     : undefined
 
-  // Generate unique animation name to avoid conflicts
-  const animationName = `michigan-loader-${Math.random().toString(36).slice(2, 11)}`
+  // Generate unique animation name using useId for SSR compatibility
+  const id = useId()
+  const animationName = `michigan-loader-${id.replace(/:/g, '-')}`
 
   return (
     <div 
@@ -110,11 +111,26 @@ export function MichiganLoader({
                 animationDuration: '4s',
                 animationTimingFunction: 'ease-in-out',
                 animationIterationCount: 'infinite',
-                animationDelay: `${index * 0.1}s`,
+                animationDelay: `${(index * 0.1).toFixed(1)}s`,
               }}
             />
           ))
         )}
+        {/* Loading text in the center */}
+        <text
+          x="285"
+          y="260"
+          textAnchor="middle"
+          dominantBaseline="middle"
+          fontSize="48"
+          fontWeight="600"
+          fill="var(--color-michigan-blue)"
+          style={{
+            fontFamily: 'var(--font-heading)',
+          }}
+        >
+          Loading
+        </text>
       </svg>
       
       {/* CSS animation for automatic mode */}

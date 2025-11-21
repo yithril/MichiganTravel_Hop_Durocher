@@ -4,11 +4,13 @@ import React from 'react'
 import { TripPlannerProvider, useTripPlanner } from './TripPlannerContext'
 import { LocationHeader } from './LocationHeader'
 import { ActivityCarousel } from './ActivityCarousel'
+import { AddActivityToDayButton } from './AddActivityToDayButton'
 import { ActivityDescription } from './ActivityDescription'
 import { ActivityIndicators } from './ActivityIndicators'
 import { DaySelector } from './DaySelector'
 import { DayActivitiesList } from './DayActivitiesList'
 import { AddActivityButton } from './AddActivityButton'
+import { CompleteButton } from './CompleteButton'
 import { BudgetDisplay } from './BudgetDisplay'
 import { MichiganLoader } from '../MichiganLoader'
 
@@ -99,8 +101,9 @@ function TripPlannerContent() {
           className="flex flex-col flex-1 overflow-hidden"
           style={{ borderRight: `1px solid var(--color-border)` }}
         >
-          <div className="flex-1 overflow-hidden p-4">
+          <div className="flex-1 min-h-0 overflow-hidden p-4 flex flex-col">
             <ActivityCarousel />
+            <AddActivityToDayButton />
           </div>
           
           <div className="p-4 space-y-4 border-t" style={{ borderColor: 'var(--color-border)' }}>
@@ -137,6 +140,9 @@ function TripPlannerContent() {
           >
             <AddActivityButton />
           </div>
+
+          {/* Complete Button - Only shows when all days have activities */}
+          <CompleteButton />
         </div>
       </div>
     </div>

@@ -23,6 +23,7 @@ class Attraction(BaseModel):
     ai_discovered = fields.BooleanField(default=False)
     confidence = fields.DecimalField(max_digits=3, decimal_places=2, null=True)  # 0-1
     seasonality = fields.CharField(max_length=50, null=True)  # e.g., "all_year", "summer", "fall"
+    image_url = fields.CharField(max_length=500, null=True)  # URL to attraction image
     
     class Meta:
         table = "attractions"

@@ -10,7 +10,6 @@ interface TripChatProps {
   isLoading?: boolean
   tripSeedState?: TripSeedStateResponse | null
   onSendMessage: (message: string) => void
-  onNewConversation?: () => void
 }
 
 export function TripChat({
@@ -19,7 +18,6 @@ export function TripChat({
   isLoading = false,
   tripSeedState,
   onSendMessage,
-  onNewConversation,
 }: TripChatProps) {
   const [inputValue, setInputValue] = useState('')
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -66,33 +64,13 @@ export function TripChat({
           backgroundColor: 'var(--color-card)'
         }}
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
-              Plan Your Trip
-            </h2>
-            <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
-              Chat with our AI to plan your perfect Michigan adventure
-            </p>
-          </div>
-          {onNewConversation && (
-            <button
-              onClick={onNewConversation}
-              className="px-4 py-2 text-sm rounded-md transition-colors"
-              style={{
-                backgroundColor: 'var(--color-primary)',
-                color: 'var(--color-primary-foreground)',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '0.9'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.opacity = '1'
-              }}
-            >
-              New Chat
-            </button>
-          )}
+        <div>
+          <h2 className="text-lg font-semibold" style={{ color: 'var(--color-foreground)' }}>
+            Plan Your Trip
+          </h2>
+          <p className="text-sm" style={{ color: 'var(--color-muted-foreground)' }}>
+            Chat with our AI to plan your perfect Michigan adventure
+          </p>
         </div>
       </div>
 

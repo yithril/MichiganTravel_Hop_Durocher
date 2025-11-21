@@ -1,8 +1,6 @@
 """Attraction controller for querying attractions by vibes."""
 from fastapi import APIRouter, Depends, Query
 from typing import Optional, List
-from core.dependencies import CurrentUser
-from core.models.user import User
 from dtos.attraction_dto import AttractionsListResponse
 from services.attraction_service import AttractionService
 
@@ -18,7 +16,6 @@ def get_attraction_service() -> AttractionService:
 
 @router.get("", response_model=AttractionsListResponse)
 async def get_attractions(
-    user: CurrentUser,
     trip_id: Optional[int] = Query(None, description="Filter attractions by trip vibes"),
     vibe_ids: Optional[str] = Query(None, description="Comma-separated list of vibe IDs"),
     limit: Optional[int] = Query(None, description="Limit number of results"),
@@ -32,7 +29,6 @@ async def get_attractions(
     - If vibe_ids is provided, uses those specific vibes
     
     Args:
-        user: Current authenticated user (from dependency)
         trip_id: Optional trip ID to get vibes from
         vibe_ids: Optional comma-separated list of vibe IDs
         limit: Optional limit on number of results
@@ -45,9 +41,10 @@ async def get_attractions(
         400: If neither trip_id nor vibe_ids is provided
     """
     if trip_id:
+        # TODO: Re-add authentication
         # Get attractions matching trip vibes
         return await attraction_service.get_attractions_by_trip_vibes(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             limit=limit,
         )

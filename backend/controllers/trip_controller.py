@@ -1,7 +1,5 @@
 """Trip controller for listing trips and active trip seeds."""
 from fastapi import APIRouter, Depends, HTTPException, status
-from core.dependencies import CurrentUser
-from core.models.user import User
 from dtos.trip_dto import (
     TripsListResponse,
     CreateTripRequest,
@@ -35,7 +33,6 @@ def get_trip_service() -> TripService:
 
 @router.get("", response_model=TripsListResponse)
 async def get_trips(
-    user: CurrentUser,
     trip_service: TripService = Depends(get_trip_service),
 ) -> TripsListResponse:
     """
@@ -46,19 +43,18 @@ async def get_trips(
     - active_trip_seeds: List of in-progress trip planning conversations
     
     Args:
-        user: Current authenticated user (from dependency)
         trip_service: Trip service (from dependency)
         
     Returns:
         TripsListResponse with trips and active trip seeds
     """
-    return await trip_service.get_user_trips_and_active_seeds(user_id=user.id)
+    # TODO: Re-add authentication
+    return await trip_service.get_user_trips_and_active_seeds(user_id=1)
 
 
 @router.post("", response_model=TripResponse, status_code=status.HTTP_201_CREATED)
 async def create_trip(
     request: CreateTripRequest,
-    user: CurrentUser,
     trip_service: TripService = Depends(get_trip_service),
 ) -> TripResponse:
     """
@@ -66,7 +62,6 @@ async def create_trip(
     
     Args:
         request: CreateTripRequest with trip_seed_id and name
-        user: Current authenticated user (from dependency)
         trip_service: Trip service (from dependency)
         
     Returns:
@@ -76,8 +71,9 @@ async def create_trip(
         HTTPException 400: If trip seed not found, not complete, or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         return await trip_service.create_trip_from_seed(
-            user_id=user.id,
+            user_id=1,
             request=request,
         )
     except ValueError as e:
@@ -90,7 +86,6 @@ async def create_trip(
 @router.get("/{trip_id}", response_model=TripDetailsResponse)
 async def get_trip_details(
     trip_id: int,
-    user: CurrentUser,
     trip_service: TripService = Depends(get_trip_service),
 ) -> TripDetailsResponse:
     """
@@ -98,7 +93,6 @@ async def get_trip_details(
     
     Args:
         trip_id: ID of the trip
-        user: Current authenticated user (from dependency)
         trip_service: Trip service (from dependency)
         
     Returns:
@@ -108,8 +102,9 @@ async def get_trip_details(
         HTTPException 400: If trip not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         return await trip_service.get_trip_details(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
         )
     except ValueError as e:
@@ -122,7 +117,6 @@ async def get_trip_details(
 @router.post("/{trip_id}/finalize", response_model=TripResponse)
 async def finalize_trip(
     trip_id: int,
-    user: CurrentUser,
     trip_service: TripService = Depends(get_trip_service),
 ) -> TripResponse:
     """
@@ -145,8 +139,9 @@ async def finalize_trip(
         HTTPException 400: If trip not found, doesn't belong to user, not in PLANNED status, or days are incomplete
     """
     try:
+        # TODO: Re-add authentication
         return await trip_service.finalize_trip(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
         )
     except ValueError as e:
@@ -159,7 +154,6 @@ async def finalize_trip(
 @router.post("/{trip_id}/complete", response_model=TripResponse)
 async def mark_trip_completed(
     trip_id: int,
-    user: CurrentUser,
     trip_service: TripService = Depends(get_trip_service),
 ) -> TripResponse:
     """
@@ -179,8 +173,9 @@ async def mark_trip_completed(
         HTTPException 400: If trip not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         return await trip_service.mark_trip_completed(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
         )
     except ValueError as e:

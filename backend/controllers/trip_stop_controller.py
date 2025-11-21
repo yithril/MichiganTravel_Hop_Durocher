@@ -1,7 +1,6 @@
 """Trip stop controller for managing trip stops (activities)."""
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List
-from core.dependencies import CurrentUser
 from dtos.trip_stop_dto import (
     TripStopResponse,
     CreateTripStopRequest,
@@ -24,7 +23,6 @@ def get_trip_stop_service() -> TripStopService:
 async def get_trip_stops(
     trip_id: int,
     day_id: int,
-    user: CurrentUser,
     trip_stop_service: TripStopService = Depends(get_trip_stop_service),
 ) -> List[TripStopResponse]:
     """
@@ -33,7 +31,6 @@ async def get_trip_stops(
     Args:
         trip_id: ID of the trip
         day_id: ID of the day
-        user: Current authenticated user (from dependency)
         trip_stop_service: Trip stop service (from dependency)
         
     Returns:
@@ -43,8 +40,9 @@ async def get_trip_stops(
         HTTPException 400: If trip/day not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         return await trip_stop_service.get_trip_stops(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
         )
@@ -60,7 +58,6 @@ async def create_trip_stop(
     trip_id: int,
     day_id: int,
     request: CreateTripStopRequest,
-    user: CurrentUser,
     trip_stop_service: TripStopService = Depends(get_trip_stop_service),
 ) -> TripStopResponse:
     """
@@ -70,7 +67,6 @@ async def create_trip_stop(
         trip_id: ID of the trip
         day_id: ID of the day
         request: CreateTripStopRequest with stop details
-        user: Current authenticated user (from dependency)
         trip_stop_service: Trip stop service (from dependency)
         
     Returns:
@@ -80,8 +76,9 @@ async def create_trip_stop(
         HTTPException 400: If trip/day not found, doesn't belong to user, or validation fails
     """
     try:
+        # TODO: Re-add authentication
         return await trip_stop_service.create_trip_stop(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
             request=request,
@@ -99,7 +96,6 @@ async def update_trip_stop(
     day_id: int,
     stop_id: int,
     request: UpdateTripStopRequest,
-    user: CurrentUser,
     trip_stop_service: TripStopService = Depends(get_trip_stop_service),
 ) -> TripStopResponse:
     """
@@ -110,7 +106,6 @@ async def update_trip_stop(
         day_id: ID of the day
         stop_id: ID of the stop to update
         request: UpdateTripStopRequest with fields to update
-        user: Current authenticated user (from dependency)
         trip_stop_service: Trip stop service (from dependency)
         
     Returns:
@@ -120,8 +115,9 @@ async def update_trip_stop(
         HTTPException 400: If trip/day/stop not found, doesn't belong to user, or validation fails
     """
     try:
+        # TODO: Re-add authentication
         return await trip_stop_service.update_trip_stop(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
             stop_id=stop_id,
@@ -139,7 +135,6 @@ async def delete_trip_stop(
     trip_id: int,
     day_id: int,
     stop_id: int,
-    user: CurrentUser,
     trip_stop_service: TripStopService = Depends(get_trip_stop_service),
 ) -> None:
     """
@@ -149,15 +144,15 @@ async def delete_trip_stop(
         trip_id: ID of the trip
         day_id: ID of the day
         stop_id: ID of the stop to delete
-        user: Current authenticated user (from dependency)
         trip_stop_service: Trip stop service (from dependency)
         
     Raises:
         HTTPException 400: If trip/day/stop not found or doesn't belong to user
     """
     try:
+        # TODO: Re-add authentication
         await trip_stop_service.delete_trip_stop(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
             stop_id=stop_id,
@@ -174,7 +169,6 @@ async def reorder_stops(
     trip_id: int,
     day_id: int,
     request: ReorderStopsRequest,
-    user: CurrentUser,
     trip_stop_service: TripStopService = Depends(get_trip_stop_service),
 ) -> List[TripStopResponse]:
     """
@@ -184,7 +178,6 @@ async def reorder_stops(
         trip_id: ID of the trip
         day_id: ID of the day
         request: ReorderStopsRequest with list of {stop_id, order_index} mappings
-        user: Current authenticated user (from dependency)
         trip_stop_service: Trip stop service (from dependency)
         
     Returns:
@@ -194,8 +187,9 @@ async def reorder_stops(
         HTTPException 400: If trip/day not found, doesn't belong to user, or validation fails
     """
     try:
+        # TODO: Re-add authentication
         return await trip_stop_service.reorder_stops(
-            user_id=user.id,
+            user_id=1,
             trip_id=trip_id,
             day_id=day_id,
             request=request,

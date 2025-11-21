@@ -3,7 +3,7 @@ Service for managing trip days.
 
 This service handles CRUD operations for TripDays.
 """
-from typing import List
+from typing import List, Optional
 from core.models.trips.trip import Trip
 from core.models.trips.trip_day import TripDay
 from core.models.places.city import City
@@ -13,6 +13,21 @@ from dtos.trip_day_dto import (
     UpdateTripDayRequest,
 )
 from dtos.trip_stop_dto import TripStopResponse
+
+
+async def get_alpena_city_id() -> Optional[int]:
+    """Helper function to look up Alpena city ID by name or slug."""
+    # Try by slug first (most reliable)
+    city = await City.filter(slug="alpena").first()
+    if city:
+        return city.id
+    
+    # Fallback to name
+    city = await City.filter(name="Alpena", state="MI").first()
+    if city:
+        return city.id
+    
+    return None
 
 
 class TripDayService:
@@ -124,17 +139,24 @@ class TripDayService:
         if existing_day:
             raise ValueError(f"Day {request.day_index} already exists for trip {trip_id}")
         
-        # Verify base_city_id if provided
-        if request.base_city_id:
-            city = await City.filter(id=request.base_city_id).first()
+        # Verify base_city_id if provided, or auto-lookup Alpena
+        base_city_id = request.base_city_id
+        if not base_city_id:
+            # Auto-lookup Alpena if no city specified
+            alpena_id = await get_alpena_city_id()
+            if alpena_id:
+                base_city_id = alpena_id
+        
+        if base_city_id:
+            city = await City.filter(id=base_city_id).first()
             if not city:
-                raise ValueError(f"City {request.base_city_id} not found")
+                raise ValueError(f"City {base_city_id} not found")
         
         # Create the day
         day = await TripDay.create(
             trip_id=trip_id,
             day_index=request.day_index,
-            base_city_id=request.base_city_id,
+            base_city_id=base_city_id,
             notes=request.notes,
         )
         
@@ -186,13 +208,19 @@ class TripDayService:
         if not day:
             raise ValueError(f"Day {day_id} not found or doesn't belong to trip {trip_id}")
         
-        # Verify base_city_id if provided
+        # Verify base_city_id if provided, or auto-lookup Alpena
         if request.base_city_id is not None:
-            if request.base_city_id:
-                city = await City.filter(id=request.base_city_id).first()
+            base_city_id = request.base_city_id
+            if base_city_id:
+                city = await City.filter(id=base_city_id).first()
                 if not city:
-                    raise ValueError(f"City {request.base_city_id} not found")
-            day.base_city_id = request.base_city_id
+                    raise ValueError(f"City {base_city_id} not found")
+            day.base_city_id = base_city_id
+        else:
+            # Auto-lookup Alpena if no city specified
+            alpena_id = await get_alpena_city_id()
+            if alpena_id:
+                day.base_city_id = alpena_id
         
         # Update notes if provided
         if request.notes is not None:

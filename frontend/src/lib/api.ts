@@ -106,6 +106,7 @@ export interface TripResponse {
   budget_band: string
   companions?: string | null
   status: string
+  cover_image_url?: string | null
   created_at: string
   updated_at: string
 }
@@ -240,6 +241,7 @@ export interface AttractionResponse {
   price_level?: string | null
   hidden_gem_score?: number | null
   seasonality?: string | null
+  image_url?: string | null
   vibes: AttractionVibeInfo[]
   created_at: string
   updated_at: string
@@ -329,6 +331,29 @@ export const api = {
     async createFromSeed(request: CreateTripRequest): Promise<TripResponse> {
       return api.post<TripResponse>('/api/trips', request)
     },
+
+    /**
+     * Finalize a trip when all days have at least one activity
+     */
+    async finalize(tripId: number): Promise<TripResponse> {
+      return api.post<TripResponse>(`/api/trips/${tripId}/finalize`)
+    },
+  },
+
+  /**
+   * Trip day endpoints
+   */
+  tripDays: {
+    /**
+     * Create a new day for a trip
+     */
+    async create(tripId: number, dayIndex: number, baseCityId?: number | null): Promise<TripDayResponse> {
+      return api.post<TripDayResponse>(`/api/trips/${tripId}/days`, {
+        day_index: dayIndex,
+        base_city_id: baseCityId || null,
+        notes: null,
+      })
+    },
   },
 
   /**
@@ -352,6 +377,12 @@ export const api = {
      */
     async getById(conversationId: number): Promise<ConversationResponse> {
       return api.get<ConversationResponse>(`/api/trip-seed/conversations/${conversationId}`)
+    },
+    /**
+     * Delete a conversation
+     */
+    async delete(conversationId: number): Promise<void> {
+      return api.delete(`/api/trip-seed/conversations/${conversationId}`)
     },
   },
 

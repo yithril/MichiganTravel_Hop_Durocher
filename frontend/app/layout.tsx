@@ -24,8 +24,11 @@ const raleway = Raleway({
 });
 
 export const metadata: Metadata = {
-  title: "Hidden Gems of Michigan",
+  title: "Hidden Gems",
   description: "Discover the hidden treasures and breathtaking landscapes of Michigan",
+  icons: {
+    icon: "/icon/map.png",
+  },
 };
 
 export default function RootLayout({

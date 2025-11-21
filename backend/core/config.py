@@ -1,6 +1,27 @@
 """Application configuration using Pydantic Settings."""
 from pydantic_settings import BaseSettings
 from pydantic import Field
+from dotenv import load_dotenv
+import os
+
+# Load .env file explicitly before Pydantic Settings loads
+# This ensures .env is loaded regardless of where the script is run from
+# Try multiple locations to support both local and Docker environments
+env_paths = [
+    os.path.join(os.path.dirname(__file__), "..", ".env"),  # backend/.env from core/
+    os.path.join(os.path.dirname(__file__), "..", "..", ".env"),  # root .env
+    ".env",  # Current directory
+    os.path.join(os.getcwd(), ".env"),  # Current working directory
+]
+
+for env_path in env_paths:
+    if os.path.exists(env_path):
+        load_dotenv(dotenv_path=env_path, override=False)
+        break
+else:
+    # If no .env file found, try loading from default location (won't fail if missing)
+    # In Docker, env vars come from docker-compose, so this is fine
+    load_dotenv(override=False)
 
 
 class Settings(BaseSettings):

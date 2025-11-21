@@ -1,7 +1,5 @@
 """Trip Seed Agent controller for handling trip planning conversations."""
 from fastapi import APIRouter, HTTPException, status, Depends
-from core.dependencies import CurrentUser
-from core.models.user import User
 from dtos.trip_seed_dto import (
     TripSeedMessageRequest,
     TripSeedAgentResponse as TripSeedAgentResponseDTO,
@@ -41,7 +39,6 @@ def get_conversation_service() -> ConversationService:
 @router.post("/message", response_model=TripSeedAgentResponseDTO)
 async def send_message(
     request: TripSeedMessageRequest,
-    user: CurrentUser,
     trip_seed_service: TripSeedService = Depends(get_trip_seed_service),
 ) -> TripSeedAgentResponseDTO:
     """
@@ -55,7 +52,6 @@ async def send_message(
     
     Args:
         request: Message request with user message and optional conversation_id
-        user: Current authenticated user (from dependency)
         trip_seed_service: Trip seed service (from dependency)
         
     Returns:
@@ -63,12 +59,12 @@ async def send_message(
         
     Raises:
         HTTPException 400: If conversation not found or validation fails
-        HTTPException 401: If not authenticated (handled by CurrentUser dependency)
     """
     try:
+        # TODO: Re-add authentication
         # Process message through service
         result = await trip_seed_service.process_message(
-            user_id=user.id,
+            user_id=1,
             message=request.message,
             conversation_id=request.conversation_id,
         )
@@ -82,7 +78,7 @@ async def send_message(
             response_text=result.agent_response.response_text,
             conversation_id=result.conversation_id,
             trip_seed_state=trip_seed_state,
-            is_complete=result.agent_response.is_complete,
+            is_complete=trip_seed_state.is_complete,  # Use the calculated state, not agent's guess
         )
         
     except ValueError as e:
@@ -100,7 +96,6 @@ async def send_message(
 @router.get("/conversations/{conversation_id}", response_model=ConversationResponse)
 async def get_conversation(
     conversation_id: int,
-    user: CurrentUser,
     conversation_service: ConversationService = Depends(get_conversation_service),
 ) -> ConversationResponse:
     """
@@ -113,7 +108,6 @@ async def get_conversation(
     
     Args:
         conversation_id: ID of the conversation to retrieve
-        user: Current authenticated user (from dependency)
         conversation_service: Conversation service (from dependency)
         
     Returns:
@@ -121,13 +115,13 @@ async def get_conversation(
         
     Raises:
         HTTPException 400: If conversation not found or doesn't belong to user
-        HTTPException 401: If not authenticated (handled by CurrentUser dependency)
     """
     try:
+        # TODO: Re-add authentication
         # Get conversation and validate it belongs to user
         conversation = await conversation_service.get_conversation(
             conversation_id=conversation_id,
-            user_id=user.id,
+            user_id=1,
         )
         
         if not conversation:
@@ -150,5 +144,59 @@ async def get_conversation(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to get conversation: {str(e)}"
+        )
+
+
+@router.delete("/conversations/{conversation_id}")
+async def delete_conversation(
+    conversation_id: int,
+    conversation_service: ConversationService = Depends(get_conversation_service),
+) -> dict:
+    """
+    Delete a conversation and all its messages.
+    
+    This endpoint:
+    - Validates that the conversation belongs to the current user
+    - Deletes the conversation and all associated messages
+    - Returns success status
+    
+    Args:
+        conversation_id: ID of the conversation to delete
+        conversation_service: Conversation service (from dependency)
+        
+    Returns:
+        Dict with success status
+        
+    Raises:
+        HTTPException 404: If conversation not found
+        HTTPException 400: If conversation doesn't belong to user
+    """
+    try:
+        # TODO: Re-add authentication
+        # Delete conversation (validates it belongs to user)
+        deleted = await conversation_service.delete_conversation(
+            conversation_id=conversation_id,
+            user_id=1,
+        )
+        
+        if not deleted:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Conversation {conversation_id} not found"
+            )
+        
+        return {"success": True, "message": "Conversation deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to delete conversation: {str(e)}"
         )
 

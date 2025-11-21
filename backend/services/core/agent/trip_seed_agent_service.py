@@ -84,6 +84,111 @@ class TripSeedAgentService(BaseAgentService[TripSeedAgentResponse]):
             **kwargs
         )
     
+    def _normalize_budget_band(self, value: str | None) -> str | None:
+        """Normalize budget band values to enum values with fallback."""
+        if value is None:
+            return None
+        
+        value_lower = value.lower().strip()
+        
+        # Map common variations to enum values
+        budget_mappings = {
+            "relaxed": "relaxed",
+            "budget": "relaxed",
+            "budget_friendly": "relaxed",
+            "budget-friendly": "relaxed",
+            "budget conscious": "relaxed",
+            "budget-conscious": "relaxed",
+            "cheap": "relaxed",
+            "affordable": "relaxed",
+            "economy": "relaxed",
+            "comfortable": "comfortable",
+            "mid-range": "comfortable",
+            "mid range": "comfortable",
+            "moderate": "comfortable",
+            "balanced": "comfortable",
+            "splurge": "splurge",
+            "premium": "splurge",
+            "luxury": "splurge",
+            "high-end": "splurge",
+            "high end": "splurge",
+            "expensive": "splurge",
+        }
+        
+        normalized = budget_mappings.get(value_lower, value_lower)
+        
+        # Validate it's a valid enum value, fallback to "comfortable" if not
+        valid_values = {"relaxed", "comfortable", "splurge"}
+        if normalized not in valid_values:
+            return "comfortable"  # Safe fallback
+        
+        return normalized
+    
+    def _normalize_trip_mode(self, value: str | None) -> str | None:
+        """Normalize trip mode values to enum values with fallback."""
+        if value is None:
+            return None
+        
+        value_lower = value.lower().strip()
+        
+        # Map common variations to enum values
+        mode_mappings = {
+            "local_hub": "local_hub",
+            "local hub": "local_hub",
+            "localhub": "local_hub",
+            "hub": "local_hub",
+            "single location": "local_hub",
+            "one place": "local_hub",
+            "road_trip": "road_trip",
+            "roadtrip": "road_trip",
+            "road trip": "road_trip",
+            "traveling": "road_trip",
+            "multiple locations": "road_trip",
+        }
+        
+        normalized = mode_mappings.get(value_lower, value_lower)
+        
+        # Validate it's a valid enum value, fallback to "local_hub" if not
+        valid_values = {"local_hub", "road_trip"}
+        if normalized not in valid_values:
+            return "local_hub"  # Safe fallback
+        
+        return normalized
+    
+    def _normalize_companions(self, value: str | None) -> str | None:
+        """Normalize companions values to enum values with fallback."""
+        if value is None:
+            return None
+        
+        value_lower = value.lower().strip()
+        
+        # Map common variations to enum values
+        companions_mappings = {
+            "solo": "solo",
+            "alone": "solo",
+            "just me": "solo",
+            "by myself": "solo",
+            "couple": "couple",
+            "partner": "couple",
+            "with my partner": "couple",
+            "my partner": "couple",
+            "family": "family",
+            "with family": "family",
+            "my family": "family",
+            "friends": "friends",
+            "with friends": "friends",
+            "my friends": "friends",
+        }
+        
+        normalized = companions_mappings.get(value_lower, value_lower)
+        
+        # Validate it's a valid enum value, fallback to "solo" if not
+        valid_values = {"solo", "couple", "family", "friends"}
+        if normalized not in valid_values:
+            return "solo"  # Safe fallback
+        
+        return normalized
+    
     def parse_response(self, response_text: str) -> TripSeedAgentResponse:
         """
         Parse the raw response into TripSeedAgentResponse.
@@ -103,11 +208,35 @@ class TripSeedAgentService(BaseAgentService[TripSeedAgentResponse]):
         Raises:
             ValueError: If response cannot be parsed
         """
+        def normalize_data(data: dict) -> dict:
+            """Normalize enum values in extracted_data."""
+            if "extracted_data" in data and isinstance(data["extracted_data"], dict):
+                extracted = data["extracted_data"].copy()
+                
+                # Normalize budget_band
+                if "budget_band" in extracted and extracted["budget_band"]:
+                    extracted["budget_band"] = self._normalize_budget_band(extracted["budget_band"])
+                
+                # Normalize trip_mode
+                if "trip_mode" in extracted and extracted["trip_mode"]:
+                    extracted["trip_mode"] = self._normalize_trip_mode(extracted["trip_mode"])
+                
+                # Normalize companions
+                if "companions" in extracted and extracted["companions"]:
+                    extracted["companions"] = self._normalize_companions(extracted["companions"])
+                
+                data["extracted_data"] = extracted
+            return data
+        
         # Try to parse as JSON first
         try:
             data = json.loads(response_text)
+            data = normalize_data(data)
             return TripSeedAgentResponse(**data)
         except json.JSONDecodeError:
+            pass
+        except Exception as e:
+            # If normalization or validation fails, try other parsing methods
             pass
         
         # Try to extract JSON from markdown code blocks
@@ -115,8 +244,11 @@ class TripSeedAgentService(BaseAgentService[TripSeedAgentResponse]):
         if json_match:
             try:
                 data = json.loads(json_match.group(1))
+                data = normalize_data(data)
                 return TripSeedAgentResponse(**data)
             except json.JSONDecodeError:
+                pass
+            except Exception as e:
                 pass
         
         # Try to find JSON object in text
@@ -124,8 +256,11 @@ class TripSeedAgentService(BaseAgentService[TripSeedAgentResponse]):
         if json_match:
             try:
                 data = json.loads(json_match.group(1))
+                data = normalize_data(data)
                 return TripSeedAgentResponse(**data)
             except json.JSONDecodeError:
+                pass
+            except Exception as e:
                 pass
         
         # If all parsing fails, raise an error
@@ -173,11 +308,13 @@ Please respond with a JSON object containing:
 """
         
         # Process with conversation history
+        # Pass original_user_message so it saves the actual user message, not the enhanced prompt
         response = await self.process(
             prompt=enhanced_prompt,
             user_id=user_id,
             conversation_id=conversation_id,
             use_history=True,
+            original_user_message=user_message,
         )
         
         # Validate and update is_complete based on actual state

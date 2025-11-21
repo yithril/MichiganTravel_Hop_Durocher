@@ -31,6 +31,7 @@ class AttractionResponse(BaseModel):
     price_level: Optional[str] = None
     hidden_gem_score: Optional[float] = None
     seasonality: Optional[str] = None
+    image_url: Optional[str] = None
     vibes: List[AttractionVibeInfo]
     created_at: str
     updated_at: str
